@@ -1,35 +1,33 @@
-# Compiler
+# Compiler and flags
 CC = gcc
-
-# Compiler flags
 CFLAGS = -Wall -g
 
-# Executable names
-TARGETS = tokenizer parser
+# Executables
+TARGETS = parser token-test
 
-# Source files
-TOKENIZER_SRCS = tokenizer.c
-PARSER_SRCS = parser.c
+# Source files per target
+PARSER_SRCS = parser.c tokenizer.c
+TOKEN_TEST_SRCS = token-test.c tokenizer.c
 
-# Object files
-TOKENIZER_OBJS = $(TOKENIZER_SRCS:.c=.o)
+# Object files per target
 PARSER_OBJS = $(PARSER_SRCS:.c=.o)
+TOKEN_TEST_OBJS = $(TOKEN_TEST_SRCS:.c=.o)
 
 # Default target
 all: $(TARGETS)
-
-# Build tokenizer
-tokenizer: $(TOKENIZER_OBJS)
-	$(CC) $(CFLAGS) -o $@ $^
 
 # Build parser
 parser: $(PARSER_OBJS)
 	$(CC) $(CFLAGS) -o $@ $^
 
-# Compile .c into .o
-%.o: %.c
+# Build token-test
+token-test: $(TOKEN_TEST_OBJS)
+	$(CC) $(CFLAGS) -o $@ $^
+
+# Compile .c to .o
+%.o: %.c types.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Clean up build files
+# Clean up
 clean:
 	rm -f *.o $(TARGETS)
