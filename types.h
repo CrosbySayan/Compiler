@@ -25,7 +25,7 @@ typedef struct Token {
 
 typedef struct TokenNode {
     Token token;
-    TokenNode* next;
+    struct TokenNode* next;
 } TokenNode;
 
 typedef struct {
