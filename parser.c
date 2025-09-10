@@ -9,8 +9,8 @@ ASTNode *parse(TokenList *token_list) {
     ASTNode *program_node = (ASTNode *)malloc(sizeof(ASTNode));
     program_node->type = PROG_NODE;
     program_node->next = NULL;
-    program_node->data.ident = "main";
 
+    curr = curr->next;
     if (curr->token.type != IDEN) {
         // throw error
         exit(1);
@@ -20,11 +20,11 @@ ASTNode *parse(TokenList *token_list) {
     ASTNode *function_node = (ASTNode *)malloc(sizeof(ASTNode));
     function_node->type = FUNC_NODE;
     function_node->next = NULL;
+    function_node->data.ident = "main";
 
     // link child
     program_node->child = function_node;
 
-    // continue with rest of program
     curr = curr->next;
     if (curr->token.type != RET) {
         // throw error
