@@ -2,7 +2,7 @@
 
 IMAGE_NAME="ubuntu-builder"
 
-docker build -t $IMAGE_NAME .
+docker buildx build --platform linux/amd64 -t $IMAGE_NAME .
 
 if [ $? -ne 0 ]; then
   echo "Docker build failed. Exiting."
@@ -11,8 +11,7 @@ fi
 
 # Runs the container with current directory mounted
 echo "Running Docker container..."
-docker run -it --rm \
+docker run --rm -it --platform linux/amd64 \
     -v "$PWD":/workspace \
     -w /workspace \
-    $IMAGE_NAME \
-    bash
+    $IMAGE_NAME bash

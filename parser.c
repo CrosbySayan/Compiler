@@ -20,7 +20,7 @@ ASTNode *parse(TokenList *token_list) {
     ASTNode *function_node = (ASTNode *)malloc(sizeof(ASTNode));
     function_node->type = FUNC_NODE;
     function_node->next = NULL;
-    function_node->data.ident = "main";
+    function_node->data.ident = curr->token.token_literal;
 
     // link child
     program_node->child = function_node;
@@ -49,7 +49,7 @@ ASTNode *parse(TokenList *token_list) {
     ASTNode *int_node = (ASTNode *)malloc(sizeof(ASTNode));
     int_node->type = INT_NODE;
     int_node->next = NULL;
-    int_node->data.value = 2;
+    int_node->data.value = atoi(curr->token.token_literal);
 
     // link child
     return_node->child = int_node;
@@ -72,4 +72,11 @@ void free_ast(ASTNode *root) {
     free_ast(root->next);
 
     free(root);
+}
+
+void generate(ASTNode *root) {
+    FILE *fptr;
+    fptr = fopen("return_2.s", "w");
+    fprintf(fptr, "");
+    fclose(fptr);
 }
