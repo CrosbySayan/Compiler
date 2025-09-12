@@ -74,9 +74,40 @@ void free_ast(ASTNode *root) {
     free(root);
 }
 
-void generate(ASTNode *root) {
-    FILE *fptr;
-    fptr = fopen("return_2.s", "w");
-    fprintf(fptr, "");
+void generate_node(ASTNode *node, FILE *fptr) {
+    switch (node->type) {
+        case PROG_NODE:
+            generate_node(node->child, fptr);
+            break;
+        case FUNC_NODE:
+            fprintf(fptr, ".globl %s\n", node->data.ident);
+            fprintf(fptr, "%s\n", node->data.ident);
+            generate_node(node->child, fptr);
+            break;
+        case RET_NODE:
+            generate_node(node->child, fptr);
+            fprintf(fptr, "ret\n");
+            break;
+        case INT_NODE:
+            fprintf(fptr, "mov w0, #%d\n", node->data.value);
+            break;
+    }
+}
+
+void generate(char *filename, ASTNode *root) {
+    FILE *fptr = fopen(filename, "w");
+    if (fptr == NULL) {
+        // throw error
+        exit(1);
+    }
+    generate_node(root, fptr);
     fclose(fptr);
+}
+
+void delete_file(char *filename) {
+    if (remove(filename) == 0) {
+        exit(0);
+    } else {
+        exit(1);
+    }
 }
