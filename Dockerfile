@@ -1,4 +1,4 @@
-FROM ubuntu:latest
+FROM ubuntu:22.04
 
 # Install build essentials (e.g., gcc, make, etc.)
 RUN apt-get update && \

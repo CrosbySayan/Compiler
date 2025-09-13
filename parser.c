@@ -20,7 +20,7 @@ ASTNode *parse(TokenList *token_list) {
     ASTNode *function_node = (ASTNode *)malloc(sizeof(ASTNode));
     function_node->type = FUNC_NODE;
     function_node->next = NULL;
-    function_node->data.ident = "main";
+    function_node->data.ident = curr->token.token_literal;
 
     // link child
     program_node->child = function_node;
@@ -49,7 +49,7 @@ ASTNode *parse(TokenList *token_list) {
     ASTNode *int_node = (ASTNode *)malloc(sizeof(ASTNode));
     int_node->type = INT_NODE;
     int_node->next = NULL;
-    int_node->data.value = 2;
+    int_node->data.value = atoi(curr->token.token_literal);
 
     // link child
     return_node->child = int_node;
@@ -72,4 +72,42 @@ void free_ast(ASTNode *root) {
     free_ast(root->next);
 
     free(root);
+}
+
+void generate_node(ASTNode *node, FILE *fptr) {
+    switch (node->type) {
+        case PROG_NODE:
+            generate_node(node->child, fptr);
+            break;
+        case FUNC_NODE:
+            fprintf(fptr, ".globl %s\n", node->data.ident);
+            fprintf(fptr, "%s\n", node->data.ident);
+            generate_node(node->child, fptr);
+            break;
+        case RET_NODE:
+            generate_node(node->child, fptr);
+            fprintf(fptr, "ret\n");
+            break;
+        case INT_NODE:
+            fprintf(fptr, "mov w0, #%d\n", node->data.value);
+            break;
+    }
+}
+
+void generate(char *filename, ASTNode *root) {
+    FILE *fptr = fopen(filename, "w");
+    if (fptr == NULL) {
+        // throw error
+        exit(1);
+    }
+    generate_node(root, fptr);
+    fclose(fptr);
+}
+
+void delete_file(char *filename) {
+    if (remove(filename) == 0) {
+        exit(0);
+    } else {
+        exit(1);
+    }
 }
