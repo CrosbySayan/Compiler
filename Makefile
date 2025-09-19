@@ -1,6 +1,18 @@
 # Compiler and flags
 CC = gcc
-CFLAGS = -Wall -g
+CFLAGS = -Wall -g -I./include
+
+# Directories
+SRC_DIR = src
+INCLUDE_DIR = include
+BUILD_DIR = .
+
+# Source files
+SRCS = $(SRC_DIR)/tokenizer.c $(SRC_DIR)/parser.c $(SRC_DIR)/types.c
+MAIN_SRC = main.c
+
+# Object files
+OBJS = tokenizer.o parser.o types.o main.o
 
 # Executables to build
 TARGETS = tokenizer parser main
@@ -20,21 +32,21 @@ tokenizer: tokenizer.o types.o
 parser: parser.o types.o
 	$(CC) $(CFLAGS) -o $@ $^
 
-# Compile main.c
-main.o: main.c types.h tokenizer.h parser.h
+# Compile main.c (in root directory)
+main.o: main.c $(INCLUDE_DIR)/types.h $(INCLUDE_DIR)/tokenizer.h $(INCLUDE_DIR)/parser.h
 	$(CC) $(CFLAGS) -c main.c -o main.o
 
-# Compile types.c (shared token functions)
-types.o: types.c types.h
-	$(CC) $(CFLAGS) -c types.c -o types.o
+# Compile types.c
+types.o: $(SRC_DIR)/types.c $(INCLUDE_DIR)/types.h
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/types.c -o types.o
 
 # Compile tokenizer.c
-tokenizer.o: tokenizer.c tokenizer.h types.h
-	$(CC) $(CFLAGS) -c tokenizer.c -o tokenizer.o
+tokenizer.o: $(SRC_DIR)/tokenizer.c $(INCLUDE_DIR)/tokenizer.h $(INCLUDE_DIR)/types.h
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/tokenizer.c -o tokenizer.o
 
 # Compile parser.c
-parser.o: parser.c parser.h tokenizer.h types.h
-	$(CC) $(CFLAGS) -c parser.c -o parser.o
+parser.o: $(SRC_DIR)/parser.c $(INCLUDE_DIR)/parser.h $(INCLUDE_DIR)/tokenizer.h $(INCLUDE_DIR)/types.h
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/parser.c -o parser.o
 
 # Clean build files
 clean:
