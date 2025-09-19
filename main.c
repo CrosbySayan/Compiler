@@ -3,7 +3,7 @@
 #include "tokenizer.h"
 #include "types.h"
 int main() {
-    char *input = "int main() {\n return 0;\n }";
+    char *input = "int output() {\n return 3;\n }";
 
     TokenList list;
     init_token_list(&list);
@@ -12,6 +12,7 @@ int main() {
     print_token_list(&list);
     ASTNode *ast = parse(&list);
     pretty_print(ast);
+    generate("test_output", ast);
     free_ast(ast);
     return 0;
 }

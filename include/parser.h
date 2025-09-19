@@ -27,6 +27,8 @@ ASTNode *parse(TokenList *token_list);
 
 void free_ast(ASTNode *root);
 
+void generate(char *filename, ASTNode *root);
+
 void pretty_print(ASTNode *root);
 
 #endif
