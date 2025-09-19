@@ -15,14 +15,18 @@ typedef enum {
 typedef struct ASTNode {
     NodeType type;
     union {
-        int value; // corresponds to INT_NODE
-        char *ident; // program identifier => PROG_NODE
-    } data; // a union will store the data for specific types
-    struct ASTNode *child; // e.g. return function
-    struct ASTNode *next; // e.g. next function
+        int value;          // corresponds to INT_NODE
+        char *ident;        // program identifier => PROG_NODE
+    } data;                 // a union will store the data for specific types
+    struct ASTNode *child;  // e.g. return function
+    struct ASTNode *next;   // e.g. next function
 } ASTNode;
 
 // Returns the root node of the AST
 ASTNode *parse(TokenList *token_list);
+
+void free_ast(ASTNode *root);
+
+void pretty_print(ASTNode *root);
 
 #endif

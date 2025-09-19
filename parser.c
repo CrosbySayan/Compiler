@@ -1,72 +1,91 @@
 #include "parser.h"
-#include "stdlib.h"
+
 #include "stdio.h"
+#include "stdlib.h"
+#include "types.h"
 
-ASTNode *parse(TokenList *token_list) {
-    TokenNode *curr = token_list->head;
-
-    // build AST for program
-    ASTNode *program_node = (ASTNode *)malloc(sizeof(ASTNode));
-    program_node->type = PROG_NODE;
-    program_node->next = NULL;
-
-    curr = curr->next;
-    if (curr->token.type != IDEN) {
-        // throw error
+// helper function for confirming token types
+// Checks a given token matches the type we expect if it does iterate to the next token.
+// Throws if we get an invalid token
+TokenNode *expectWithValue(TokenList *tokens, TokenType type) {
+    if (!tokens || !tokens->head) {
+        fprintf(stderr, "ERROR: Unexpected end of tokens.\n");
         exit(1);
     }
 
-    // build AST for function
-    ASTNode *function_node = (ASTNode *)malloc(sizeof(ASTNode));
-    function_node->type = FUNC_NODE;
-    function_node->next = NULL;
-    function_node->data.ident = curr->token.token_literal;
-
-    // link child
-    program_node->child = function_node;
-
-    curr = curr->next;
-    if (curr->token.type != RET) {
-        // throw error
+    if (tokens->head->token.type != type) {
+        fprintf(stderr, "ERROR: token %s does not match expected type.\n", tokens->head->token.token_literal);
         exit(1);
     }
 
-    // build AST for return
-    ASTNode *return_node = (ASTNode *)malloc(sizeof(ASTNode));
-    return_node->type = RET_NODE;
-    return_node->next = NULL;
+    return pop_token(tokens);
+}
 
-    // link child
-    function_node->child = return_node;
+void expect(TokenList *tokens, TokenType type) { free_token(expectWithValue(tokens, type)); }
 
-    curr = curr->next;
-    if (curr->token.type != INT) {
-        // throw error
-        exit(1);
-    }
+ASTNode *createASTNode(NodeType type) {
+    ASTNode *node = (ASTNode *)malloc(sizeof(ASTNode));
+    node->type = type;
+    node->child = NULL;
+    node->next = NULL;
+    return node;
+}
 
-    // build AST for int
-    ASTNode *int_node = (ASTNode *)malloc(sizeof(ASTNode));
-    int_node->type = INT_NODE;
-    int_node->next = NULL;
-    int_node->data.value = atoi(curr->token.token_literal);
+ASTNode *parse_expression(TokenList *tokens) {
+    ASTNode *expression_node = createASTNode(INT_NODE);
 
-    // link child
-    return_node->child = int_node;
+    TokenNode *exp = expectWithValue(tokens, LITERAL);
+    expression_node->data.value = atoi(exp->token.token_literal);
+    free_token(exp);
+    return expression_node;
+}
 
-    curr = curr->next;
-    if (curr->token.type != SEMI) {
-        // throw error
-        exit(1);
-    }
+//<statement> ::= "return" <exp> ";"
+ASTNode *parse_statement(TokenList *tokens) {
+    ASTNode *statement_node = createASTNode(RET_NODE);
+    statement_node->type = RET_NODE;  // Note: should probably change this to the more general statement later
+
+    expect(tokens, RET);
+    statement_node->child = parse_expression(tokens);
+    expect(tokens, SEMI);
+
+    return statement_node;
+}
+
+//<function> ::= "int" <id> "(" ")" "{" <statement> "}"
+ASTNode *parse_func(TokenList *tokens) {
+    ASTNode *function_node = createASTNode(FUNC_NODE);
+
+    expect(tokens, INT);
+
+    TokenNode *iden = expectWithValue(tokens, IDEN);
+    function_node->data.ident = strdup(iden->token.token_literal);
+    expect(tokens, LEFT_PAREN);
+    expect(tokens, RIGHT_PAREN);
+    expect(tokens, LEFT_BRACK);
+    // statement
+    function_node->child = parse_statement(tokens);
+    expect(tokens, RIGHT_BRACK);
+
+    free_token(iden);
+    return function_node;
+}
+
+ASTNode *parse_prog(TokenList *tokens) {
+    ASTNode *program_node = createASTNode(PROG_NODE);
+    program_node->child = parse_func(tokens);
     return program_node;
 }
+
+ASTNode *parse(TokenList *token_list) { return parse_prog(token_list); }
 
 void free_ast(ASTNode *root) {
     if (root == NULL) {
         return;
     }
-
+    if (root->type == FUNC_NODE && root->data.ident) {
+        free(root->data.ident);
+    }
     // recursively free ASTNodes
     free_ast(root->child);
     free_ast(root->next);
@@ -111,3 +130,61 @@ void delete_file(char *filename) {
         exit(1);
     }
 }
+
+void pretty_print_helper(ASTNode *node, int depth) {
+    if (node == NULL) {
+        return;
+    }
+
+    for (int i = 0; i < depth; i++) {
+        printf(" ");
+    }
+
+    switch (node->type) {
+        case PROG_NODE:
+            // PROGRAM START
+            if (node->child) {
+                pretty_print_helper(node->child, depth);
+            }
+            break;
+
+        case FUNC_NODE:
+            printf("FUN INT %s:\n", node->data.ident);
+
+            // Print params (empty for now)
+            for (int i = 0; i < depth + 1; i++) {
+                printf(" ");
+            }
+            printf("params: ()\n");
+
+            // Print body
+            for (int i = 0; i < depth + 1; i++) {
+                printf(" ");
+            }
+            printf("body:\n");
+            if (node->child) {
+                pretty_print_helper(node->child, depth + 2);
+            }
+            break;
+        case RET_NODE:
+            printf("RETURN ");
+            if (node->child) {
+                pretty_print_helper(node->child, 1);
+            } else {
+                printf("\n");
+            }
+            break;
+        case INT_NODE:
+            printf("Int<%d>\n", node->data.value);
+            break;
+        default:
+            printf("UNKNOWN NODE\n");
+            break;
+    }
+    if (node->next) {
+        pretty_print_helper(node->next, depth);
+    }
+}
+
+// Debug Pretty Print
+void pretty_print(ASTNode *root) { pretty_print_helper(root, 0); }
