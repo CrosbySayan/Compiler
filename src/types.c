@@ -67,7 +67,8 @@ void print_token_list(const TokenList *list) {
     while (current != NULL) {
         const char *type_names[] = {"LEFT_PAREN", "RIGHT_PAREN", "LEFT_BRACK", "RIGHT_BRACK", "SEMI", "NEG", "BIT_COM",
                                     "LOG_NEG",    "IDEN",        "ASIGN",      "LITERAL",     "RET",  "INT", "ILLEGAL"};
-        printf("Token: %-12s  Literal: %s\n", type_names[current->token.type], current->token.token_literal);
+        printf("\033[1;32mToken:\033[0m %-12s  \033[1;32mLiteral:\033[0m %s\n", type_names[current->token.type],
+               current->token.token_literal);
         current = current->next;
     }
 }

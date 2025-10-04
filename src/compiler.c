@@ -73,20 +73,24 @@ int main(int argc, char *argv[]) {
     }
 
     // Debugging Token List print out
+    fprintf(stdout, "\n\033[34mGenerating Tokens:\033[0m\n");
     print_token_list(&tokenList);
     // Parse AST nodes from token list
     ASTNode *ast = parse(&tokenList);
 
     // Debugging AST print
+    fprintf(stdout, "\033[31mGenerating AST:\033[0m\n");
     pretty_print(ast);
 
     // Generate Assembly
-    char asm_filename[256];
-    snprintf(asm_filename, sizeof(asm_filename), "%s.s", filename);
-    generate(asm_filename, ast);
-    // Turn Assembly -> an executable
-    invoke_gcc(asm_filename, filename);
-
+    // char asm_filename[256];
+    // snprintf(asm_filename, sizeof(asm_filename), "%s.s", filename);
+    // generate(asm_filename, ast);
+    // // Turn Assembly -> an executable
+    // invoke_gcc(asm_filename, filename);
+    //
+    // // Delete Assembly file
+    // remove(asm_filename);
     // Cleanup
     free_ast(ast);
     fclose(filePtr);

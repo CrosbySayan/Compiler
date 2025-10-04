@@ -31,13 +31,35 @@ ASTNode *createASTNode(NodeType type) {
     return node;
 }
 
-ASTNode *parse_expression(TokenList *tokens) {
-    ASTNode *expression_node = createASTNode(INT_NODE);
+//<unary_op> ::= "!" | "~" | "-"
+ASTNode *parse_unaryOp(TokenList *tokens) {
+    ASTNode *unaryOp_node = createASTNode(UNARYOP_NODE);
 
-    TokenNode *exp = expectWithValue(tokens, LITERAL);
-    expression_node->data.value = atoi(exp->token.token_literal);
-    free_token(exp);
-    return expression_node;
+    TokenNode *tok = pop_token(tokens);
+
+    if (tok->token.type == BIT_COM || tok->token.type == NEG || tok->token.type == LOG_NEG) {
+        // Add it to the node
+        unaryOp_node->data.ident = tok->token.token_literal;  // or however you store the operator
+    } else {
+        fprintf(stderr, "ERROR: token %s does not match expected type.\n", tokens->head->token.token_literal);
+        exit(1);
+    }
+    return unaryOp_node;
+}
+
+//<exp> ::= <unary_op> <exp> | <int>
+ASTNode *parse_expression(TokenList *tokens) {
+    if (tokens->head->token.type == LITERAL) {
+        ASTNode *expression_node = createASTNode(INT_NODE);
+        TokenNode *exp = expectWithValue(tokens, LITERAL);
+        expression_node->data.value = atoi(exp->token.token_literal);
+        free_token(exp);
+        return expression_node;
+    } else {
+        ASTNode *unary_node = parse_unaryOp(tokens);
+        unary_node->child = parse_expression(tokens);
+        return unary_node;
+    }
 }
 
 //<statement> ::= "return" <exp> ";"
@@ -110,6 +132,9 @@ void generate_node(ASTNode *node, FILE *fptr) {
         case INT_NODE:
             fprintf(fptr, "movl $%d, %%eax\n", node->data.value);
             break;
+        case UNARYOP_NODE:
+            // Write special things based on chars
+            break;
     }
 }
 
@@ -176,6 +201,14 @@ void pretty_print_helper(ASTNode *node, int depth) {
             break;
         case INT_NODE:
             printf("Int<%d>\n", node->data.value);
+            break;
+        case UNARYOP_NODE:
+            printf("%s", node->data.ident);
+            if (node->child) {
+                pretty_print_helper(node->child, 0);
+            } else {
+                printf("\n");
+            }
             break;
         default:
             printf("UNKNOWN NODE\n");
