@@ -8,17 +8,22 @@ INCLUDE_DIR = include
 BUILD_DIR = .
 
 # Source files
-SRCS = $(SRC_DIR)/tokenizer.c $(SRC_DIR)/parser.c $(SRC_DIR)/types.c
+SRCS = $(SRC_DIR)/tokenizer.c $(SRC_DIR)/parser.c $(SRC_DIR)/types.c $(SRC_DIR)/compiler.c
 MAIN_SRC = main.c
 
 # Object files
-OBJS = tokenizer.o parser.o types.o main.o
+OBJS = compiler.o tokenizer.o parser.o types.o main.o
 
 # Executables to build
-TARGETS = tokenizer parser main
+TARGETS = tokenizer parser main compiler
 
 # Default target
 all: $(TARGETS)
+
+
+# Build compiler executable (used for testing actual compiler)
+compiler: compiler.o tokenizer.o parser.o types.o
+	$(CC) $(CFLAGS) -o $@ $^
 
 # Build main executable (combines all modules)
 main: main.o tokenizer.o parser.o types.o
@@ -31,6 +36,10 @@ tokenizer: tokenizer.o types.o
 # Build parser standalone
 parser: parser.o types.o
 	$(CC) $(CFLAGS) -o $@ $^
+
+# Compile compiler
+compiler.o: $(SRC_DIR)/compiler.c $(INCLUDE_DIR)/types.h $(INCLUDE_DIR)/tokenizer.h $(INCLUDE_DIR)/parser.h
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/compiler.c -o compiler.o
 
 # Compile main.c (in root directory)
 main.o: main.c $(INCLUDE_DIR)/types.h $(INCLUDE_DIR)/tokenizer.h $(INCLUDE_DIR)/parser.h

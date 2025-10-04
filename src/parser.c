@@ -100,7 +100,7 @@ void generate_node(ASTNode *node, FILE *fptr) {
             break;
         case FUNC_NODE:
             fprintf(fptr, ".globl %s\n", node->data.ident);
-            fprintf(fptr, "%s\n", node->data.ident);
+            fprintf(fptr, "%s:\n", node->data.ident);
             generate_node(node->child, fptr);
             break;
         case RET_NODE:
@@ -108,7 +108,7 @@ void generate_node(ASTNode *node, FILE *fptr) {
             fprintf(fptr, "ret\n");
             break;
         case INT_NODE:
-            fprintf(fptr, "mov w0, #%d\n", node->data.value);
+            fprintf(fptr, "movl $%d, %%eax\n", node->data.value);
             break;
     }
 }
