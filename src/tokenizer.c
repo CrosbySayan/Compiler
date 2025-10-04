@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include "types.h"
+
 bool is_breakpoint(char point) {
     switch (point) {
         case '(':
@@ -16,6 +18,9 @@ bool is_breakpoint(char point) {
         case '=':
         case '\t':
         case '\0':
+        case '-':
+        case '~':
+        case '!':
             return true;
         default:
             return false;
@@ -110,6 +115,18 @@ void tokenize(char *buff, TokenList *list) {
                 break;
             case '=':
                 add_token(list, create_token(ASIGN, "="));
+                currentPoint++;
+                break;
+            case '-':
+                add_token(list, create_token(NEG, "-"));
+                currentPoint++;
+                break;
+            case '~':
+                add_token(list, create_token(BIT_COM, "~"));
+                currentPoint++;
+                break;
+            case '!':
+                add_token(list, create_token(LOG_NEG, "!"));
                 currentPoint++;
                 break;
             default:

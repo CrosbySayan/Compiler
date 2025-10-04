@@ -12,6 +12,11 @@ typedef enum {
     RIGHT_BRACK,
     SEMI,
 
+    // Unary Operators
+    NEG,      // -
+    BIT_COM,  // ~
+    LOG_NEG,  // !
+
     IDEN,   // "main"
     ASIGN,  // =
     LITERAL,

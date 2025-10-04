@@ -8,6 +8,7 @@ typedef enum {
     PROG_NODE,
     FUNC_NODE,
     RET_NODE,
+    UNARYOP_NODE,
     INT_NODE,
 } NodeType;
 
