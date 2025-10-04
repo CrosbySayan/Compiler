@@ -83,14 +83,14 @@ int main(int argc, char *argv[]) {
     pretty_print(ast);
 
     // Generate Assembly
-    // char asm_filename[256];
-    // snprintf(asm_filename, sizeof(asm_filename), "%s.s", filename);
-    // generate(asm_filename, ast);
-    // // Turn Assembly -> an executable
-    // invoke_gcc(asm_filename, filename);
-    //
-    // // Delete Assembly file
-    // remove(asm_filename);
+    char asm_filename[256];
+    snprintf(asm_filename, sizeof(asm_filename), "%s.s", filename);
+    generate(asm_filename, ast);
+    // Turn Assembly -> an executable
+    invoke_gcc(asm_filename, filename);
+
+    // Delete Assembly file
+    remove(asm_filename);
     // Cleanup
     free_ast(ast);
     fclose(filePtr);

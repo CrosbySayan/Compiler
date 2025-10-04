@@ -134,6 +134,19 @@ void generate_node(ASTNode *node, FILE *fptr) {
             break;
         case UNARYOP_NODE:
             // Write special things based on chars
+            generate_node(node->child, fptr);
+            if (strcmp(node->data.ident, "!") == 0) {
+                // logical negation
+                fprintf(fptr, "cmpl $0, %%eax\n");
+                fprintf(fptr, "movl $0, %%eax\n");
+                fprintf(fptr, "sete %%al\n");
+            } else if (strcmp(node->data.ident, "-") == 0) {
+                // negation
+                fprintf(fptr, "neg %%eax\n");
+            } else if (strcmp(node->data.ident, "~") == 0) {
+                // bitwise complement
+                fprintf(fptr, "not %%eax\n");
+            }
             break;
     }
 }
